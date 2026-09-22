@@ -1,11 +1,16 @@
 import { parseArticles, shortDate } from './data.js'
 
-const html = await (await fetch('./nordstream.html')).text()
+const html = await (await fetch('./index.html')).text()
 const doc = new DOMParser().parseFromString(html, 'text/html')
 const arr = parseArticles(doc)
 
-const monthName = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' })
+const monthName = new Intl.DateTimeFormat('nb-NO', { month: 'long', year: 'numeric' })
 const setStat = (k, v) => document.querySelectorAll(`[data-stat="${k}"]`).forEach(el => (el.textContent = v))
+
+// Google Translate proxy link for non-Norwegian readers. Google fetches the
+// page itself, so this only works once the site is publicly hosted.
+const translate = document.getElementById('translate')
+translate.href = `https://translate.google.com/translate?sl=no&tl=en&u=${encodeURIComponent(location.href)}`
 
 // ---------------------------------------------------------------------------
 // Stats
@@ -47,8 +52,10 @@ function buildHline(root) {
       <div class="hline-years"></div>
       <div class="hline-dots"></div>
     </div>
-    <svg class="hline-links" aria-hidden="true"></svg>
-    <div class="hline-labels"></div>
+    <div class="hline-body">
+      <svg class="hline-links" aria-hidden="true"></svg>
+      <div class="hline-labels"></div>
+    </div>
   `
   const rug = root.querySelector('.hline-rug')
   const years = root.querySelector('.hline-years')
@@ -72,7 +79,7 @@ function buildHline(root) {
   const labelEls = events.map(a => {
     const d = document.createElement('a')
     d.className = 'hline-dot'
-    d.href = `./nordstream.html#p-${arr.indexOf(a)}`
+    d.href = `./index.html#p-${arr.indexOf(a)}`
     d.style.left = `${fx(a.ts)}%`
     d.setAttribute('aria-label', a.headline)
     dots.appendChild(d)
@@ -89,34 +96,54 @@ function buildHline(root) {
   })
 
   const GAP = 12
-  function layout() {
-    const W = labels.clientWidth
-    // Desired x = the dot's x. Push right on collision, then pull the tail
-    // back left if it overflowed the container.
-    const want = events.map(a => (fx(a.ts) / 100) * W)
-    const widths = labelEls.map(l => l.offsetWidth)
-    const x = []
+  const LINK_H = 36   // px of connector space above the labels
+  const ROW_H = 40    // px per label row
+
+  // Desired x = the dot's x. Push right on collision, then pull the tail
+  // back left if it overflowed the container.
+  function packRow(idx, want, widths, W) {
+    const x = {}
     let prev = -Infinity
-    for (let i = 0; i < want.length; i++) {
+    for (const i of idx) {
       x[i] = Math.max(want[i], prev + GAP)
       prev = x[i] + widths[i]
     }
     let limit = W
-    for (let i = want.length - 1; i >= 0; i--) {
+    for (const i of [...idx].reverse()) {
       x[i] = Math.min(x[i], limit - widths[i])
       limit = x[i] - GAP
     }
+    return x
+  }
 
-    const H = links.clientHeight
+  function layout() {
+    const W = labels.clientWidth
+    const want = events.map(a => (fx(a.ts) / 100) * W)
+    const widths = labelEls.map(l => l.offsetWidth)
+
+    // One row if everything fits, otherwise alternate labels over two rows.
+    const total = widths.reduce((s, w) => s + w, 0) + GAP * (widths.length - 1)
+    const rows = total <= W ? 1 : 2
+    const rowOf = i => i % rows
+    const x = {}
+    for (let r = 0; r < rows; r++) {
+      Object.assign(x, packRow(events.map((_, i) => i).filter(i => rowOf(i) === r), want, widths, W))
+    }
+
+    labels.style.height = `${rows * ROW_H}px`
+    const H = LINK_H + rows * ROW_H
     links.setAttribute('viewBox', `0 0 ${W} ${H}`)
     links.innerHTML = ''
     labelEls.forEach((l, i) => {
+      const r = rowOf(i)
       l.style.left = `${Math.max(0, x[i])}px`
-      // Elbow: down from the dot, across, down to the label. Alternate the
-      // elbow height so neighbouring connectors don't run on top of each other.
-      const mid = H * (0.35 + 0.3 * (i % 2))
+      l.style.top = `${r * ROW_H}px`
+      // Elbow: down from the dot, across at a per-row height, down to the
+      // label. Second-row connectors pass behind first-row labels.
+      const mid = LINK_H * (0.4 + 0.35 * r)
+      const bottom = LINK_H + r * ROW_H
       const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline')
-      p.setAttribute('points', `${want[i]},0 ${want[i]},${mid} ${x[i] + 1},${mid} ${x[i] + 1},${H}`)
+      p.setAttribute('points', `${want[i]},0 ${want[i]},${mid} ${x[i] + 1},${mid} ${x[i] + 1},${bottom}`)
       links.appendChild(p)
     })
   }
@@ -151,7 +178,7 @@ function buildChart(root, tableEl) {
   const svg = document.createElementNS(ns, 'svg')
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`)
   svg.setAttribute('role', 'img')
-  svg.setAttribute('aria-label', 'Articles per year')
+  svg.setAttribute('aria-label', 'Artikler per år')
   const el = (tag, attrs, parent = svg) => {
     const e = document.createElementNS(ns, tag)
     for (const k in attrs) e.setAttribute(k, attrs[k])
@@ -193,7 +220,7 @@ function buildChart(root, tableEl) {
   tip.className = 'chart-tip'
   root.appendChild(tip)
   const show = g => {
-    tip.textContent = `${g.dataset.year}: ${g.dataset.count} article${g.dataset.count === '1' ? '' : 's'}`
+    tip.textContent = `${g.dataset.year}: ${g.dataset.count} ${g.dataset.count === '1' ? 'artikkel' : 'artikler'}`
     const r = g.querySelector('.mark').getBoundingClientRect()
     const rr = root.getBoundingClientRect()
     tip.style.left = `${r.left + r.width / 2 - rr.left}px`
@@ -209,7 +236,7 @@ function buildChart(root, tableEl) {
     g.addEventListener('blur', () => hide(g))
   })
 
-  tableEl.innerHTML = `<thead><tr><th>Year</th><th>Articles</th></tr></thead><tbody>${
+  tableEl.innerHTML = `<thead><tr><th>År</th><th>Artikler</th></tr></thead><tbody>${
     rows.map(r => `<tr><td>${r.year}</td><td>${r.count}</td></tr>`).join('')
   }</tbody>`
 }

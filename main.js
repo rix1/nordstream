@@ -8,7 +8,9 @@ function replaceBody() {
   body.innerHTML = ''
   const header = document.createElement('header')
   header.className = 'topbar'
-  header.innerHTML = `<a class="about-link" href="./about.html">What is this?</a>`
+  header.innerHTML = `<a class="about-link" href="./about.html">Hva er dette?</a>
+    <a class="about-link" lang="en" hreflang="en" rel="noopener" target="_blank"
+       href="https://translate.google.com/translate?sl=no&tl=en&u=${encodeURIComponent(location.href)}">Translate to English ↗</a>`
   body.appendChild(header)
 
   const main = document.createElement('main')

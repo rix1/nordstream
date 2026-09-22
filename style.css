@@ -49,6 +49,8 @@ body {
   position: fixed;
   top: 0;
   right: 0;
+  display: flex;
+  gap: 4px;
   padding: 16px 24px;
   z-index: 20;
 }
@@ -422,10 +424,17 @@ h2 {
   z-index: 1;
 }
 
+/* Connector space (36px) plus one or two 40px label rows; the SVG overlays
+   both so connectors can reach the second row. Heights are set from JS. */
+.hline-body {
+  position: relative;
+  padding-top: 36px;
+}
 .hline-links {
-  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: 36px;
+  height: 100%;
 }
 .hline-links polyline {
   fill: none;
@@ -443,8 +452,9 @@ h2 {
   top: 0;
   display: flex;
   flex-direction: column;
-  padding-left: 6px;
+  padding: 0 6px 4px;
   border-left: 1px solid var(--faint);
+  background: var(--bg);   /* occludes connectors passing behind */
   text-decoration: none !important;
   white-space: nowrap;
   transition: border-color 0.15s ease;
