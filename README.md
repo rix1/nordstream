@@ -34,12 +34,13 @@ English" link that runs it through Google Translate.
 ## How it works
 
 ```
-node scrape.mjs   →  articles.json         (NRK's serum API → structured JSON)
-node build.mjs    →  index.html, about.html (prerendered from templates/)
+deno task scrape   →  articles.json                 (NRK's serum API → structured JSON)
+deno task build    →  index.html, about.html, dist/ (prerendered from templates/)
 ```
 
-`npm run update` runs both. There are no dependencies and no build tooling —
+`deno task update` runs both. There are no dependencies and no build tooling —
 the output is static HTML with two small ES modules for the interactive bits.
+The scripts are plain ESM and run under Node too (`node build.mjs`).
 
 - `scrape.mjs` fetches the compilation's item list from
   `/serum/api/content/json/<id>` and each bulletin as an HTML fragment from
@@ -59,7 +60,7 @@ and rebuild.
 ## Running locally
 
 ```sh
-npm run dev        # http://127.0.0.1:3000
+deno task dev      # http://127.0.0.1:3000
 ```
 
 Any static server works; the pages use ES modules, so they won't load over
@@ -69,14 +70,14 @@ Any static server works; the pages use ES modules, so they won't load over
 
 Cloudflare Pages, connected to this repo. Every push to `main` deploys:
 
-- Build command: `npm run build && npm run dist`
+- Build command: `node build.mjs`
 - Output directory: `dist`
 
 Scraping is deliberately *not* part of the build, so the live site always
 matches the committed `articles.json`. A full refresh is:
 
 ```sh
-npm run update     # scrape + build
+deno task update   # scrape + build
 git add -A && git commit -m "Update articles" && git push
 ```
 

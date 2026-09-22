@@ -1,13 +1,16 @@
-// Render index.html and about.html from articles.json + templates/.
+// Render index.html and about.html from articles.json + templates/, and
+// assemble the deployable site in dist/.
 //
-//   node build.mjs
+//   deno task build   (or: node build.mjs — Cloudflare Pages runs this)
 //
 // Posts are prerendered as HTML. Each page also embeds a compact article
 // list (id, ts, headline, event) for the timeline rail and the about-page
 // visuals, so the browser never parses or fetches the full data.
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync } from 'node:fs'
 import { tagEvents, shortDate, longDate } from './data.js'
+
+const SITE_FILES = ['index.html', 'about.html', 'style.css', 'main.js', 'about.js', 'data.js']
 
 const articles = tagEvents(JSON.parse(readFileSync('articles.json', 'utf8')))
 const built = new Date()
@@ -68,4 +71,10 @@ writeFileSync('about.html', fill(template('about.html'), {
   table,
 }))
 
-console.log(`built index.html (${articles.length} posts) and about.html`)
+// --- dist/ -------------------------------------------------------------------
+
+rmSync('dist', { recursive: true, force: true })
+mkdirSync('dist')
+for (const f of SITE_FILES) copyFileSync(f, `dist/${f}`)
+
+console.log(`built index.html (${articles.length} posts) and about.html → dist/`)
