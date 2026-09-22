@@ -1,0 +1,220 @@
+:root {
+  --bg: #fff;
+  --fg: #111;
+  --muted: #777;
+  --faint: #d4d4d4;
+  --tick: #b5b5b5;
+  --accent: #0a66ff;
+  --label-bg: rgba(255, 255, 255, 0.92);
+  --rail-w: 64px;
+  --rail-pad: 40px;
+  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e0e0e;
+    --fg: #ececec;
+    --muted: #8a8a8a;
+    --faint: #2c2c2c;
+    --tick: #4a4a4a;
+    --accent: #5b9cff;
+    --label-bg: rgba(14, 14, 14, 0.92);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Posts ------------------------------------------------------------------ */
+
+.posts {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 24px 50vh;
+}
+
+.post {
+  margin-bottom: 3rem;
+  scroll-margin-top: 64px;
+}
+
+.date, h2 {
+  margin-bottom: 0;
+}
+
+.date {
+  margin-top: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.body {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.body a {
+  color: var(--muted);
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.body a:hover { color: var(--accent); }
+
+/* Rail ------------------------------------------------------------------- */
+
+.rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--rail-w);
+  padding: var(--rail-pad) 0 var(--rail-pad) 20px;
+  box-sizing: border-box;
+  user-select: none;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.rail-ticks {
+  position: relative;
+  height: 100%;
+  width: 12px;
+}
+
+/* Viewport window: which slice of the story is on screen right now. */
+.rail-viewport {
+  position: absolute;
+  top: 0;
+  left: -4px;
+  right: -4px;
+  background: var(--fg);
+  opacity: 0.08;
+  border-radius: 3px;
+  pointer-events: none;
+  will-change: transform, height;
+}
+
+@media (prefers-color-scheme: dark) {
+  .rail-viewport { opacity: 0.14; }
+}
+
+.tick {
+  position: absolute;
+  left: 0;
+  display: block;
+  width: 12px;
+  height: 1px;
+  margin-top: -0.5px;
+  background: var(--tick);
+  transform-origin: left center;
+  opacity: 0.35;
+  will-change: transform, opacity;
+}
+/* A larger invisible hit area so the whole rail width is hoverable. */
+.tick::after {
+  content: "";
+  position: absolute;
+  inset: -2px -40px -2px -20px;
+}
+
+.tick.is-active {
+  background: var(--accent);
+  opacity: 1 !important;
+}
+
+.tick.is-near {
+  background: var(--fg);
+}
+
+.rail-year {
+  position: absolute;
+  left: 20px;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.rail.is-hover .rail-year { opacity: 0; }
+
+.rail-label {
+  position: absolute;
+  top: 0;
+  left: calc(20px + 48px);
+  width: 240px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 10px;
+  background: var(--label-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--faint);
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+  translate: -4px 0;
+  transition: opacity 0.15s ease, translate 0.15s cubic-bezier(0.2, 0, 0, 1);
+}
+.rail.is-hover .rail-label {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+}
+/* Invisible bridge over the gap between the tick column and the label, so
+   the pointer never leaves the rail on its way across. */
+.rail-label::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  width: 40px;
+}
+
+.rail-label-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.rail-label-title {
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 860px), (hover: none) {
+  .rail { display: none; }
+}
