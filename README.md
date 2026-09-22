@@ -35,7 +35,7 @@ English" link that runs it through Google Translate.
 
 ```
 deno task scrape   →  articles.json                 (NRK's serum API → structured JSON)
-deno task build    →  index.html, about.html, dist/ (prerendered from templates/)
+deno task build    →  dist/                         (prerendered from templates/)
 ```
 
 `deno task update` runs both. There are no dependencies and no build tooling —
@@ -48,9 +48,10 @@ The scripts are plain ESM and run under Node too (`node build.mjs`).
   timestamp and URL.
 - `articles.json` is committed, so `git diff` after an update shows exactly
   which articles are new.
-- `build.mjs` renders the posts and stats into the templates and embeds a
-  compact article list (`id`, `ts`, `headline`, `event`) that the client
-  scripts read — the browser never parses or fetches the full data.
+- `build.mjs` renders the posts and stats into the templates, writes the
+  site to `dist/` (not checked in), and embeds a compact article list
+  (`id`, `ts`, `headline`, `event`) that the client scripts read — the
+  browser never parses or fetches the full data.
 - `data.js` holds the list of key events (by NRK article id) and is shared
   between the build and the browser.
 
@@ -60,7 +61,8 @@ and rebuild.
 ## Running locally
 
 ```sh
-deno task dev      # http://127.0.0.1:3000
+deno task build    # → dist/
+deno task dev      # serves dist/ at http://127.0.0.1:3000
 ```
 
 Any static server works; the pages use ES modules, so they won't load over

@@ -1,5 +1,5 @@
-// Render index.html and about.html from articles.json + templates/, and
-// assemble the deployable site in dist/.
+// Render index.html and about.html from articles.json + templates/ into
+// dist/, alongside the static files. dist/ is the whole deployable site.
 //
 //   deno task build   (or: node build.mjs — Cloudflare Pages runs this)
 //
@@ -10,7 +10,7 @@
 import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync } from 'node:fs'
 import { tagEvents, shortDate, longDate } from './data.js'
 
-const SITE_FILES = ['index.html', 'about.html', 'style.css', 'main.js', 'about.js', 'data.js']
+const STATIC_FILES = ['style.css', 'main.js', 'about.js', 'data.js']
 
 const articles = tagEvents(JSON.parse(readFileSync('articles.json', 'utf8')))
 const built = new Date()
@@ -22,6 +22,9 @@ const template = name => readFileSync(`templates/${name}`, 'utf8')
 // Embedded JSON: `</script` inside a string would end the block early.
 const compact = articles.map(({ id, ts, headline, event }) => ({ id, ts, headline, ...(event && { event }) }))
 const ARTICLES = JSON.stringify(compact).replace(/<\//g, '<\\/')
+
+rmSync('dist', { recursive: true, force: true })
+mkdirSync('dist')
 
 const common = {
   ARTICLES,
@@ -36,7 +39,7 @@ const POSTS = articles.map((a, i) => `<article class="post" id="p-${i}" data-i="
 <div class="body">${a.body} <a class="permalink" href="${esc(a.url)}">[link]</a></div>
 </article>`).join('\n\n')
 
-writeFileSync('index.html', fill(template('index.html'), { ...common, POSTS }))
+writeFileSync('dist/index.html', fill(template('index.html'), { ...common, POSTS }))
 
 // --- about.html ------------------------------------------------------------
 
@@ -60,7 +63,7 @@ const table = `<thead><tr><th>År</th><th>Artikler</th></tr></thead><tbody>${
   rows.map(([y, n]) => `<tr><td>${y}</td><td>${n}</td></tr>`).join('')
 }</tbody>`
 
-writeFileSync('about.html', fill(template('about.html'), {
+writeFileSync('dist/about.html', fill(template('about.html'), {
   ...common,
   count: articles.length,
   first: shortDate.format(new Date(articles[0].ts)),
@@ -71,10 +74,6 @@ writeFileSync('about.html', fill(template('about.html'), {
   table,
 }))
 
-// --- dist/ -------------------------------------------------------------------
+for (const f of STATIC_FILES) copyFileSync(f, `dist/${f}`)
 
-rmSync('dist', { recursive: true, force: true })
-mkdirSync('dist')
-for (const f of SITE_FILES) copyFileSync(f, `dist/${f}`)
-
-console.log(`built index.html (${articles.length} posts) and about.html → dist/`)
+console.log(`built dist/ (${articles.length} posts)`)

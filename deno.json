@@ -3,6 +3,6 @@
     "scrape": "deno run --allow-net --allow-write=articles.json scrape.mjs",
     "build": "deno run --allow-read --allow-write build.mjs",
     "update": "deno task scrape && deno task build",
-    "dev": "deno run --allow-net --allow-read jsr:@std/http/file-server --port 3000 --no-dir-listing ."
+    "dev": "deno run --allow-net --allow-read jsr:@std/http/file-server --port 3000 --no-dir-listing dist"
   }
 }
