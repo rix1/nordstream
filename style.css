@@ -5,6 +5,7 @@
   --faint: #d4d4d4;
   --tick: #b5b5b5;
   --accent: #0a66ff;
+  --red: #e5484d;
   --label-bg: rgba(255, 255, 255, 0.92);
   --rail-w: 64px;
   --rail-pad: 40px;
@@ -20,6 +21,7 @@
     --faint: #2c2c2c;
     --tick: #4a4a4a;
     --accent: #5b9cff;
+    --red: #ff6369;
     --label-bg: rgba(14, 14, 14, 0.92);
   }
 }
@@ -65,6 +67,10 @@ body {
   color: var(--muted);
 }
 
+h2 a {
+    color: var(--fg);
+    text-decoration: none;
+}
 h2 {
   margin-top: 0;
   font-size: 20px;
@@ -151,6 +157,25 @@ h2 {
   background: var(--fg);
 }
 
+/* Key events: red tick, plus a dot hanging off its left end. The dot is a
+   sibling rather than a pseudo-element so the lens doesn't stretch it. */
+.tick.is-event,
+.tick.is-event.is-near,
+.tick.is-event.is-active {
+  background: var(--red);
+  opacity: 1 !important;
+}
+.rail-dot {
+  position: absolute;
+  left: -8px;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: var(--red);
+  pointer-events: none;
+}
+
 .rail-year {
   position: absolute;
   left: 20px;
@@ -163,6 +188,12 @@ h2 {
   transition: opacity 0.2s ease;
 }
 .rail.is-hover .rail-year { opacity: 0; }
+
+.rail-event {
+  color: var(--red);
+  font-weight: 500;
+  white-space: nowrap;
+}
 
 .rail-label {
   position: absolute;
@@ -203,6 +234,13 @@ h2 {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--muted);
+}
+/* Event tag after the date, e.g. "26. sep. 2022 · Eksplosjonene". */
+.rail-label-date[data-event]:not([data-event=""]) {
+  color: var(--red);
+}
+.rail-label-date[data-event]:not([data-event=""])::after {
+  content: " · " attr(data-event);
 }
 
 .rail-label-title {

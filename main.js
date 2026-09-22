@@ -16,6 +16,22 @@ const arr = [];
 titles.forEach(el => arr.push(handleEl(el)))
 arr.sort((a, b) => a.ts - b.ts)
 
+// Key events, marked red on the timeline. `match` is a headline substring;
+// the first article (chronologically) containing it gets the marker.
+const EVENTS = [
+  { match: 'Nord Stream 2-rørledningen ferdig', label: 'NS2 ferdig' },
+  { match: 'Tyskland stoppar Nord Stream 2', label: 'NS2 stoppet' },
+  { match: 'Gazprom har stoppa gassforsyninga', label: 'NS1 stengt' },
+  { match: 'Gasslekkasje nær Nord Stream 2', label: 'Eksplosjonene' },
+  { match: 'Tyskland har identifisert båt', label: 'Båtsporet' },
+  { match: 'har flykta til Ukraina', label: 'Etterlysning' },
+]
+for (const ev of EVENTS) {
+  const item = arr.find(a => a.headline.includes(ev.match))
+  if (item) item.event = ev.label
+  else console.warn('Event not found:', ev.match)
+}
+
 const body = document.body
 
 function replaceBody() {
@@ -27,7 +43,7 @@ function replaceBody() {
     div.innerHTML = `
       <article class="post" id="p-${i}" data-i="${i}">
       <p class="date">${el.tsReadable}</p>
-      <h2 class="headline">${el.headline}</h2>
+      <h2 class="headline"><a href="${el.url}">${el.headline}</a></h2>
       <p class="body">${el.body} <a href=${el.url}>[link]</a></p>
       </article>
       `
@@ -62,6 +78,7 @@ function buildRail() {
     a.href = `#p-${i}`
     a.style.top = `${pct(i)}%`
     a.setAttribute('aria-label', el.headline)
+    if (el.event) a.classList.add('is-event')
     ticks.appendChild(a)
 
     const year = new Date(el.ts).getFullYear()
@@ -73,24 +90,38 @@ function buildRail() {
       ticks.appendChild(y)
       lastYear = year
     }
+    if (el.event) {
+      const dot = document.createElement('span')
+      dot.className = 'rail-dot'
+      dot.style.top = `${pct(i)}%`
+      ticks.appendChild(dot)
+
+      const s = document.createElement('span')
+      s.className = 'rail-year rail-event'
+      s.textContent = el.event
+      s.dataset.i = i
+      ticks.appendChild(s)
+    }
   })
 
   // Sparse years (2016–2019 have one article each) would land 3px apart, so
-  // year labels are positioned in px with a minimum gap rather than in %.
-  const YEAR_GAP = 13
-  const yearEls = Array.from(ticks.querySelectorAll('.rail-year'))
-  function layoutYears() {
+  // year and event labels are positioned in px with a minimum gap rather
+  // than in %. Laid out together so events can't overlap a year label.
+  const LABEL_GAP = 13
+  const labelEls = Array.from(ticks.querySelectorAll('.rail-year'))
+    .sort((a, b) => Number(a.dataset.i) - Number(b.dataset.i))
+  function layoutLabels() {
     const h = ticks.getBoundingClientRect().height
     let prev = -Infinity
-    for (const y of yearEls) {
+    for (const y of labelEls) {
       const want = (pct(Number(y.dataset.i)) / 100) * h
-      const top = Math.max(want, prev + YEAR_GAP)
+      const top = Math.max(want, prev + LABEL_GAP)
       y.style.top = `${top}px`
       prev = top
     }
   }
-  window.addEventListener('resize', layoutYears)
-  requestAnimationFrame(layoutYears)
+  window.addEventListener('resize', layoutLabels)
+  requestAnimationFrame(layoutLabels)
 
   const label = document.createElement('div')
   label.className = 'rail-label'
@@ -178,6 +209,7 @@ function attachMagnifier(rail, ticks, label) {
       const item = arr[i]
       labelDate.textContent = shortDate.format(new Date(item.ts))
       labelTitle.textContent = item.headline
+      labelDate.dataset.event = item.event || ''
     }
     labelTargetY = centers[i] - rail.getBoundingClientRect().top
     // First show: snap instead of gliding in from wherever it last was.
