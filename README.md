@@ -67,8 +67,13 @@ Any static server works; the pages use ES modules, so they won't load over
 
 ## Deployment
 
-Cloudflare Pages, connected to this repo. No build command; the repo root is
-the output directory, since the built pages are committed.
+Cloudflare Pages via direct upload:
+
+```sh
+npm run deploy     # copies the site files to dist/ and runs wrangler pages deploy
+```
+
+So a full refresh is `npm run update && npm run deploy`, then commit.
 
 ## Data and copyright
 

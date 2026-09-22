@@ -6,6 +6,8 @@
     "scrape": "node scrape.mjs",
     "build": "node build.mjs",
     "update": "node scrape.mjs && node build.mjs",
-    "serve": "python3 -m http.server 3000 --bind 127.0.0.1"
+    "serve": "python3 -m http.server 3000 --bind 127.0.0.1",
+    "dist": "rm -rf dist && mkdir dist && cp index.html about.html style.css main.js about.js data.js dist/",
+    "deploy": "npm run dist && wrangler pages deploy dist --project-name nordstream-rix1-dev --commit-dirty=true"
   }
 }
