@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>What is this? — Nord Stream</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./about.js" type="module"></script>
+</head>
+<body class="about">
+<header class="topbar">
+    <a class="about-link" href="./nordstream.html">← Back to the articles</a>
+</header>
+
+<main class="about-main">
+    <h1>Nord Stream, in one place</h1>
+
+    <p class="lede">
+        Hybrid warfare is designed to be hard to follow. A pipeline is finished,
+        then halted; gas is cut off; something explodes on the seabed; leaks
+        reach the press; suspects are named, then contradicted. Each of these
+        arrives as a small news item, weeks or years apart, and the thread
+        between them is easy to lose. That is not an accident — it is the point.
+    </p>
+
+    <p>
+        This is an attempt at the opposite. It collects every article NRK has
+        published in its <em>Gassrørledningen Nord Stream</em> feed —
+        <span data-stat="count">…</span> of them, from
+        <span data-stat="first">…</span> to <span data-stat="last">…</span> —
+        and lays them out in chronological order on a single page. The
+        timeline in the margin shows the shape of the story; the red markers
+        are the moments that turn it.
+    </p>
+
+    <p>
+        Nothing here is analysis. It is the record, arranged so the pattern
+        is visible.
+    </p>
+
+    <section class="stats" aria-label="Summary">
+        <div class="stat"><span class="stat-value" data-stat="count">…</span><span class="stat-label">articles</span></div>
+        <div class="stat"><span class="stat-value" data-stat="years">…</span><span class="stat-label">years</span></div>
+        <div class="stat"><span class="stat-value" data-stat="peak">…</span><span class="stat-label">in <span data-stat="peak-month">…</span></span></div>
+    </section>
+
+    <section>
+        <h2>Key moments</h2>
+        <p class="muted">Every article as a tick on a time axis. Red marks the events highlighted on the main page.</p>
+        <div class="hline" id="hline"></div>
+    </section>
+
+    <section>
+        <h2>Articles per year</h2>
+        <div class="chart" id="chart"></div>
+        <details class="table-view">
+            <summary>View as table</summary>
+            <table id="chart-table"></table>
+        </details>
+    </section>
+
+    <footer class="about-footer">
+        Source: <a href="https://www.nrk.no/nyheter/gassrorledningen-nord-stream-1.13828304">NRK — Gassrørledningen Nord Stream</a>.
+        Articles are © NRK and link back to the originals.
+    </footer>
+</main>
+</body>
+</html>

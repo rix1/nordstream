@@ -1,41 +1,16 @@
-function handleEl(el) {
-  const ts = el.previousElementSibling;
-  const body = el.nextElementSibling;
-  return {
-    ts: ts ? Number(ts.getAttribute('data-timestamp')) : '',
-    tsReadable: ts.innerText,
-    headline: el.innerText,
-    body: body ? body.innerText : '',
-    url: ts.querySelector('a').href
-  }
-}
+import { parseArticles, shortDate } from './data.js'
 
-const titles = document.querySelectorAll('.bulletin-title')
-
-const arr = [];
-titles.forEach(el => arr.push(handleEl(el)))
-arr.sort((a, b) => a.ts - b.ts)
-
-// Key events, marked red on the timeline. `match` is a headline substring;
-// the first article (chronologically) containing it gets the marker.
-const EVENTS = [
-  { match: 'Nord Stream 2-rørledningen ferdig', label: 'NS2 ferdig' },
-  { match: 'Tyskland stoppar Nord Stream 2', label: 'NS2 stoppet' },
-  { match: 'Gazprom har stoppa gassforsyninga', label: 'NS1 stengt' },
-  { match: 'Gasslekkasje nær Nord Stream 2', label: 'Eksplosjonene' },
-  { match: 'Tyskland har identifisert båt', label: 'Båtsporet' },
-  { match: 'har flykta til Ukraina', label: 'Etterlysning' },
-]
-for (const ev of EVENTS) {
-  const item = arr.find(a => a.headline.includes(ev.match))
-  if (item) item.event = ev.label
-  else console.warn('Event not found:', ev.match)
-}
+const arr = parseArticles(document)
 
 const body = document.body
 
 function replaceBody() {
   body.innerHTML = ''
+  const header = document.createElement('header')
+  header.className = 'topbar'
+  header.innerHTML = `<a class="about-link" href="./about.html">What is this?</a>`
+  body.appendChild(header)
+
   const main = document.createElement('main')
   main.className = 'posts'
   arr.forEach((el, i) => {
@@ -55,8 +30,6 @@ function replaceBody() {
 // ---------------------------------------------------------------------------
 // Timeline rail: one tick per article, magnified around the cursor.
 // ---------------------------------------------------------------------------
-
-const shortDate = new Intl.DateTimeFormat('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' })
 
 function buildRail() {
   const n = arr.length
