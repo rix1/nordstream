@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hva er dette? — Nord Stream</title>
+    <link rel="stylesheet" href="./style.css">
+    <script id="articles" type="application/json">{{ARTICLES}}</script>
+    <script src="./about.js" type="module"></script>
+</head>
+<body class="about">
+<header class="topbar">
+    <a class="about-link" href="./index.html">← Tilbake til artiklene</a>
+    <a class="about-link translate-link" id="translate" href="#" lang="en" hreflang="en" rel="noopener" target="_blank">Translate to English ↗</a>
+</header>
+
+<main class="about-main">
+    <h1>Nord Stream, samlet på ett sted</h1>
+
+    <p class="lede">
+        Hybrid krigføring er laget for å være vanskelig å følge med på. En
+        rørledning blir ferdig, så stanset; gassen blir skrudd av; noe
+        eksploderer på havbunnen; lekkasjer når pressen; mistenkte blir
+        navngitt, og så motsagt. Hver av disse kommer som en liten
+        nyhetsmelding, uker eller år fra hverandre, og tråden mellom dem er
+        lett å miste. Det er ikke tilfeldig – det er poenget.
+    </p>
+
+    <p>
+        Dette er et forsøk på det motsatte. Her er alle artiklene NRK har
+        publisert i strømmen <em>Gassrørledningen Nord Stream</em> –
+        {{count}} av dem, fra
+        {{first}} til {{last}} –
+        lagt ut kronologisk på én side. Tidslinjen i margen viser formen på
+        historien; de røde markørene er øyeblikkene som snur den.
+    </p>
+
+    <p>
+        Ingenting her er analyse. Det er bare det som ble skrevet, ordnet
+        slik at mønsteret blir synlig.
+    </p>
+
+    <section class="stats" aria-label="Oppsummering">
+        <div class="stat"><span class="stat-value">{{count}}</span><span class="stat-label">artikler</span></div>
+        <div class="stat"><span class="stat-value">{{years}}</span><span class="stat-label">år</span></div>
+        <div class="stat"><span class="stat-value">{{peak}}</span><span class="stat-label">i {{peakMonth}}</span></div>
+    </section>
+
+    <section>
+        <h2>Viktige øyeblikk</h2>
+        <p class="muted">Hver artikkel er en strek på tidsaksen. Rødt markerer hendelsene som er uthevet på hovedsiden.</p>
+        <div class="hline" id="hline"></div>
+    </section>
+
+    <section>
+        <h2>Artikler per år</h2>
+        <div class="chart" id="chart"></div>
+        <details class="table-view">
+            <summary>Vis som tabell</summary>
+            <table>{{table}}</table>
+        </details>
+    </section>
+
+    <footer class="about-footer">
+        Kilde: <a href="https://www.nrk.no/nyheter/gassrorledningen-nord-stream-1.13828304">NRK – Gassrørledningen Nord Stream</a>.
+        Artiklene tilhører NRK og lenker til originalene. Sist oppdatert {{built}}.
+    </footer>
+</main>
+</body>
+</html>

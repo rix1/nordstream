@@ -1,33 +1,13 @@
-import { parseArticles, shortDate } from './data.js'
+import { embeddedArticles, shortDate } from './data.js'
 
-const arr = parseArticles(document)
-
+// Posts are prerendered by build.mjs; this script only adds the rail.
+const arr = embeddedArticles()
 const body = document.body
 
-function replaceBody() {
-  body.innerHTML = ''
-  const header = document.createElement('header')
-  header.className = 'topbar'
-  header.innerHTML = `<a class="about-link" href="./about.html">Hva er dette?</a>
-    <a class="about-link" lang="en" hreflang="en" rel="noopener" target="_blank"
-       href="https://translate.google.com/translate?sl=no&tl=en&u=${encodeURIComponent(location.href)}">Translate to English ↗</a>`
-  body.appendChild(header)
-
-  const main = document.createElement('main')
-  main.className = 'posts'
-  arr.forEach((el, i) => {
-    const div = document.createElement('div')
-    div.innerHTML = `
-      <article class="post" id="p-${i}" data-i="${i}">
-      <p class="date">${el.tsReadable}</p>
-      <h2 class="headline"><a href="${el.url}">${el.headline}</a></h2>
-      <p class="body">${el.body} <a href=${el.url}>[link]</a></p>
-      </article>
-      `
-    main.appendChild(div.firstElementChild)
-  })
-  body.appendChild(main)
-}
+// Google Translate proxy link: Google fetches the page itself, so this only
+// works once the site is publicly hosted.
+document.getElementById('translate').href =
+  `https://translate.google.com/translate?sl=no&tl=en&u=${encodeURIComponent(location.href)}`
 
 // ---------------------------------------------------------------------------
 // Timeline rail: one tick per article, magnified around the cursor.
@@ -312,5 +292,4 @@ function attachViewport(ticks) {
   update()
 }
 
-replaceBody()
 buildRail()

@@ -108,14 +108,29 @@ h2 {
   margin-top: 0.5rem;
   margin-bottom: 0;
 }
+.body p {
+  margin: 0 0 0.5rem;
+}
+.body p:last-of-type {
+  display: inline;   /* so the permalink sits on the last line */
+}
 
+/* Inline links in NRK's text */
 .body a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--faint);
+  text-underline-offset: 3px;
+}
+.body a:hover { text-decoration-color: var(--fg); }
+
+.body a.permalink {
   color: var(--muted);
   text-decoration: none;
   font-family: var(--mono);
   font-size: 12px;
 }
-.body a:hover { color: var(--accent); }
+.body a.permalink:hover { color: var(--accent); }
 
 /* Rail ------------------------------------------------------------------- */
 

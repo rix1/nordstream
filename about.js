@@ -1,40 +1,21 @@
-import { parseArticles, shortDate } from './data.js'
+import { embeddedArticles, shortDate } from './data.js'
 
-const html = await (await fetch('./index.html')).text()
-const doc = new DOMParser().parseFromString(html, 'text/html')
-const arr = parseArticles(doc)
+// Stats and the table are prerendered by build.mjs; this script draws the
+// timeline and the chart, which need viewport measurement and hover.
+const arr = embeddedArticles()
 
-const monthName = new Intl.DateTimeFormat('nb-NO', { month: 'long', year: 'numeric' })
-const setStat = (k, v) => document.querySelectorAll(`[data-stat="${k}"]`).forEach(el => (el.textContent = v))
-
-// Google Translate proxy link for non-Norwegian readers. Google fetches the
-// page itself, so this only works once the site is publicly hosted.
-const translate = document.getElementById('translate')
-translate.href = `https://translate.google.com/translate?sl=no&tl=en&u=${encodeURIComponent(location.href)}`
-
-// ---------------------------------------------------------------------------
-// Stats
-// ---------------------------------------------------------------------------
+// Google Translate proxy link: Google fetches the page itself, so this only
+// works once the site is publicly hosted.
+document.getElementById('translate').href =
+  `https://translate.google.com/translate?sl=no&tl=en&u=${encodeURIComponent(location.href)}`
 
 const byYear = new Map()
-const byMonth = new Map()
 for (const a of arr) {
-  const d = new Date(a.ts)
-  byYear.set(d.getFullYear(), (byYear.get(d.getFullYear()) || 0) + 1)
-  const m = `${d.getFullYear()}-${d.getMonth()}`
-  byMonth.set(m, (byMonth.get(m) || 0) + 1)
+  const y = new Date(a.ts).getFullYear()
+  byYear.set(y, (byYear.get(y) || 0) + 1)
 }
 const firstYear = new Date(arr[0].ts).getFullYear()
 const lastYear = new Date(arr[arr.length - 1].ts).getFullYear()
-const [peakKey, peakCount] = [...byMonth.entries()].sort((a, b) => b[1] - a[1])[0]
-const [py, pm] = peakKey.split('-').map(Number)
-
-setStat('count', arr.length)
-setStat('first', shortDate.format(new Date(arr[0].ts)))
-setStat('last', shortDate.format(new Date(arr[arr.length - 1].ts)))
-setStat('years', `${firstYear}–${lastYear}`)
-setStat('peak', peakCount)
-setStat('peak-month', monthName.format(new Date(py, pm, 1)))
 
 // ---------------------------------------------------------------------------
 // Horizontal timeline: time-proportional axis, a rug of all articles, red
@@ -156,7 +137,7 @@ function buildHline(root) {
 // Articles per year: single-series column chart.
 // ---------------------------------------------------------------------------
 
-function buildChart(root, tableEl) {
+function buildChart(root) {
   const rows = []
   for (let y = firstYear; y <= lastYear; y++) rows.push({ year: y, count: byYear.get(y) || 0 })
   const max = Math.max(...rows.map(r => r.count))
@@ -236,10 +217,7 @@ function buildChart(root, tableEl) {
     g.addEventListener('blur', () => hide(g))
   })
 
-  tableEl.innerHTML = `<thead><tr><th>År</th><th>Artikler</th></tr></thead><tbody>${
-    rows.map(r => `<tr><td>${r.year}</td><td>${r.count}</td></tr>`).join('')
-  }</tbody>`
 }
 
 buildHline(document.getElementById('hline'))
-buildChart(document.getElementById('chart'), document.getElementById('chart-table'))
+buildChart(document.getElementById('chart'))

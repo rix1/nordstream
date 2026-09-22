@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nord Stream — tidslinje</title>
+    <link rel="stylesheet" href="./style.css">
+    <script id="articles" type="application/json">{{ARTICLES}}</script>
+    <script src="./main.js" type="module"></script>
+</head>
+<body>
+<!-- Built {{built}} from articles.json — edit templates/index.html, not this file. -->
+<header class="topbar">
+    <a class="about-link" href="./about.html">Hva er dette?</a>
+    <a class="about-link" id="translate" href="#" lang="en" hreflang="en" rel="noopener" target="_blank">Translate to English ↗</a>
+</header>
+
+<main class="posts">
+{{POSTS}}
+</main>
+</body>
+</html>
