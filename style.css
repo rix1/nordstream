@@ -437,7 +437,12 @@ h2 {
   background: var(--red);
   box-shadow: 0 0 0 2px var(--bg);
   z-index: 1;
+  transition: box-shadow 0.15s ease;
 }
+.hline-dot.is-hover {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--red);
+}
+.hline-label.is-hover { border-color: var(--red); }
 
 /* Connector space (36px) plus one or two 40px label rows; the SVG overlays
    both so connectors can reach the second row. Heights are set from JS. */
@@ -455,11 +460,20 @@ h2 {
   fill: none;
   stroke: var(--faint);
   stroke-width: 1;
+  transition: stroke 0.15s ease;
 }
+.hline-links polyline.is-hover {
+  stroke: var(--red);
+}
+/* Stacking: base connectors (0) < labels (1) < hovered connector (2).
+   The top layer is see-through to the pointer so labels stay hoverable. */
+.hline-links { z-index: 0; }
+.hline-links-top { z-index: 2; pointer-events: none; }
 
 .hline-labels {
   position: relative;
   height: 40px;
+  z-index: 1;
 }
 
 .hline-label {

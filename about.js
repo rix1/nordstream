@@ -36,12 +36,14 @@ function buildHline(root) {
     <div class="hline-body">
       <svg class="hline-links" aria-hidden="true"></svg>
       <div class="hline-labels"></div>
+      <svg class="hline-links hline-links-top" aria-hidden="true"></svg>
     </div>
   `
   const rug = root.querySelector('.hline-rug')
   const years = root.querySelector('.hline-years')
   const dots = root.querySelector('.hline-dots')
   const links = root.querySelector('.hline-links')
+  const linksTop = root.querySelector('.hline-links-top')  // above the labels
   const labels = root.querySelector('.hline-labels')
 
   for (const a of arr) {
@@ -57,13 +59,16 @@ function buildHline(root) {
   }
 
   const events = arr.filter(a => a.event)
-  const labelEls = events.map(a => {
+  const dotEls = []
+  const lineEls = []   // rebuilt by layout(); index-aligned with events
+  const labelEls = events.map((a, i) => {
     const d = document.createElement('a')
     d.className = 'hline-dot'
     d.href = `./index.html#p-${arr.indexOf(a)}`
     d.style.left = `${fx(a.ts)}%`
     d.setAttribute('aria-label', a.headline)
     dots.appendChild(d)
+    dotEls.push(d)
 
     const l = document.createElement('a')
     l.className = 'hline-label'
@@ -73,6 +78,21 @@ function buildHline(root) {
     l.lastElementChild.textContent = a.event
     l.title = a.headline
     labels.appendChild(l)
+
+    // Hovering the label or the dot highlights the whole path: dot,
+    // connector and label together.
+    const set = on => {
+      for (const el of [d, l, lineEls[i]]) el?.classList.toggle('is-hover', on)
+      // Idle connectors run behind the labels; the hovered one moves to the
+      // layer above them so the whole path stays visible.
+      if (lineEls[i]) (on ? linksTop : links).appendChild(lineEls[i])
+    }
+    for (const el of [d, l]) {
+      el.addEventListener('pointerenter', () => set(true))
+      el.addEventListener('pointerleave', () => set(false))
+      el.addEventListener('focus', () => set(true))
+      el.addEventListener('blur', () => set(false))
+    }
     return l
   })
 
@@ -114,7 +134,9 @@ function buildHline(root) {
     labels.style.height = `${rows * ROW_H}px`
     const H = LINK_H + rows * ROW_H
     links.setAttribute('viewBox', `0 0 ${W} ${H}`)
+    linksTop.setAttribute('viewBox', `0 0 ${W} ${H}`)
     links.innerHTML = ''
+    linksTop.innerHTML = ''
     labelEls.forEach((l, i) => {
       const r = rowOf(i)
       l.style.left = `${Math.max(0, x[i])}px`
@@ -125,7 +147,10 @@ function buildHline(root) {
       const bottom = LINK_H + r * ROW_H
       const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline')
       p.setAttribute('points', `${want[i]},0 ${want[i]},${mid} ${x[i] + 1},${mid} ${x[i] + 1},${bottom}`)
-      links.appendChild(p)
+      const hovered = l.classList.contains('is-hover')
+      if (hovered) p.classList.add('is-hover')
+      ;(hovered ? linksTop : links).appendChild(p)
+      lineEls[i] = p
     })
   }
   layout()
