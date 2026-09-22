@@ -59,7 +59,7 @@ and rebuild.
 ## Running locally
 
 ```sh
-npm run serve      # http://127.0.0.1:3000
+npm run dev        # http://127.0.0.1:3000
 ```
 
 Any static server works; the pages use ES modules, so they won't load over
@@ -67,13 +67,18 @@ Any static server works; the pages use ES modules, so they won't load over
 
 ## Deployment
 
-Cloudflare Pages via direct upload:
+Cloudflare Pages, connected to this repo. Every push to `main` deploys:
+
+- Build command: `npm run build && npm run dist`
+- Output directory: `dist`
+
+Scraping is deliberately *not* part of the build, so the live site always
+matches the committed `articles.json`. A full refresh is:
 
 ```sh
-npm run deploy     # copies the site files to dist/ and runs wrangler pages deploy
+npm run update     # scrape + build
+git add -A && git commit -m "Update articles" && git push
 ```
-
-So a full refresh is `npm run update && npm run deploy`, then commit.
 
 ## Data and copyright
 
